@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>it.replicator</groupId>
+    <artifactId>replicate-schemas-skip</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+    <name>IT: Plugin run with skip=true</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.example.maven.plugins</groupId>
+                <artifactId>oracle-to-h2-replicate-maven-plugin</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>replicate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>replicate-schemas</goal>
+                        </goals>
+                        <configuration>
+                            <oracleJdbcUrl>${oracle-h2.oracleJdbcUrl}</oracleJdbcUrl>
+                            <oracleUser>${oracle-h2.oracleUser}</oracleUser>
+                            <oraclePassword>${oracle-h2.oraclePassword}</oraclePassword>
+                            <schemas>${oracle-h2.schemas}</schemas>
+                            <skip>${oracle-h2.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

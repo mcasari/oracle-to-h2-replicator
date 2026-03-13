@@ -13,9 +13,14 @@ Maven plugin that reads one or more **Oracle** schemas and replicates their stru
 Install the plugin into your local repository:
 
 ```bash
-cd oracle-to-h2-replicate-maven-plugin
+cd oracle-to-h2-replicator
 mvn clean install
 ```
+
+## Testing
+
+- **Unit tests**: `mvn test` — runs JUnit tests for `OracleTypeMapper`, `H2SchemaReplicator`, `FlywayRunner`, and `ReplicateSchemasMojo` (e.g. skip behavior, empty schemas).
+- **Integration tests**: `mvn verify` — runs the [maven-invoker-plugin](https://maven.apache.org/plugins/maven-invoker-plugin/) so a test project executes the plugin (with `skip=true`, no Oracle required). Integration test project: `src/it/replicate-schemas-skip/`.
 
 ## Usage
 

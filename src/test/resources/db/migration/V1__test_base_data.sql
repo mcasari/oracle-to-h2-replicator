@@ -1,0 +1,3 @@
+-- Test migration for FlywayRunnerTest (H2 Oracle mode)
+CREATE TABLE IF NOT EXISTS TEST_BASE (ID INT PRIMARY KEY, LABEL VARCHAR(100));
+INSERT INTO TEST_BASE (ID, LABEL) VALUES (1, 'base');
