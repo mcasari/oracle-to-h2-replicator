@@ -43,6 +43,12 @@ Optional: use a **file-based** H2 database so it persists and can be used by tes
 mvn ... -Doracle-h2.h2JdbcUrl="jdbc:h2:file:./target/replicated;MODE=Oracle;DB_CLOSE_DELAY=-1"
 ```
 
+Optional: **populate base data with Flyway** (run migrations against H2 after replication):
+
+```bash
+mvn ... -Doracle-h2.runFlyway=true -Doracle-h2.flywayLocations=classpath:db/migration
+```
+
 ### From a POM
 
 Add the plugin and run the goal `oracle-h2:replicate-schemas` (optionally in a profile):
@@ -63,6 +69,12 @@ Add the plugin and run the goal `oracle-h2:replicate-schemas` (optionally in a p
         <!-- <schemaList><param>SCOTT</param><param>HR</param></schemaList> -->
         <h2JdbcUrl>jdbc:h2:file:${project.build.directory}/replicated;MODE=Oracle;DB_CLOSE_DELAY=-1</h2JdbcUrl>
         <copyData>false</copyData>
+        <!-- Populate base data from Flyway scripts -->
+        <runFlyway>true</runFlyway>
+        <flywayLocations>
+          <param>classpath:db/migration</param>
+        </flywayLocations>
+        <flywayBaselineOnMigrate>true</flywayBaselineOnMigrate>
       </configuration>
     </plugin>
   </plugins>
@@ -94,9 +106,26 @@ mvn oracle-h2:replicate-schemas -Doracle-h2.copyData=true
 | `h2User`           | `oracle-h2.h2User`          | No       | `SA`                                                  | H2 user |
 | `h2Password`       | `oracle-h2.h2Password`      | No       | ``                                                    | H2 password |
 | `copyData`         | `oracle-h2.copyData`        | No       | `false`                                               | If `true`, copy table data from Oracle to H2 |
+| `runFlyway`        | `oracle-h2.runFlyway`       | No       | `false`                                               | If `true`, run Flyway migrations against H2 after replication (base data) |
+| `flywayLocations`  | `oracle-h2.flywayLocations` | No       | `classpath:db/migration`                              | Flyway script locations (e.g. `classpath:db/migration`, `filesystem:src/main/resources/db/migration`) |
+| `flywayBaselineOnMigrate` | `oracle-h2.flywayBaselineOnMigrate` | No | `true`  | If `true`, Flyway baselines existing replicated schema and applies pending migrations |
 | `skip`             | `oracle-h2.skip`             | No       | `false`                                               | Skip execution |
 
-\* Either `schemas` or `schemaListParam` must be set.
+\* Either `schemas` or `schemaList` must be set.
+
+### Populate with Flyway (base data)
+
+When `runFlyway=true`, the plugin runs [Flyway](https://flywaydb.org/) against the replicated H2 database after creating the schema (and optionally copying Oracle data). Use this to load base/reference data from versioned SQL (or Java) migrations.
+
+- **flywayLocations**: Where to find scripts. Default `classpath:db/migration` looks for resources in `src/main/resources/db/migration/` (e.g. `V1__base_data.sql`, `V2__more_data.sql`). Use `filesystem:path` for a directory on disk.
+- **flywayBaselineOnMigrate**: Should be `true` when the H2 schema already has tables (replicated from Oracle), so Flyway baselines the existing schema and only runs *pending* migrations (e.g. INSERT scripts). Set to `false` only if you want Flyway to manage the schema from scratch.
+
+Example migration script for H2 (Oracle mode) in `src/main/resources/db/migration/V1__base_data.sql`:
+
+```sql
+-- Base data for replicated schema (H2 Oracle mode)
+INSERT INTO MYSCHEMA.MYTABLE (ID, NAME) VALUES (1, 'Sample');
+```
 
 ## What is replicated
 

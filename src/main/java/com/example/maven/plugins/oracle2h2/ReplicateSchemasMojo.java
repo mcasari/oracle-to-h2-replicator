@@ -60,6 +60,18 @@ public class ReplicateSchemasMojo extends AbstractMojo {
     @Parameter(property = "oracle-h2.copyData", defaultValue = "false")
     private boolean copyData;
 
+    /** If true, run Flyway migrations against H2 after replication to populate base data. Default: false. */
+    @Parameter(property = "oracle-h2.runFlyway", defaultValue = "false")
+    private boolean runFlyway;
+
+    /** Flyway script locations (e.g. classpath:db/migration or filesystem:src/main/resources/db/migration). Used when runFlyway=true. */
+    @Parameter(property = "oracle-h2.flywayLocations")
+    private List<String> flywayLocations;
+
+    /** If true, Flyway will baseline existing schema (e.g. replicated tables) and then apply pending migrations. Use when runFlyway=true and schema already exists. Default: true when runFlyway is true. */
+    @Parameter(property = "oracle-h2.flywayBaselineOnMigrate", defaultValue = "true")
+    private boolean flywayBaselineOnMigrate;
+
     /** Skip execution. Useful when binding to a phase but running only on demand via -Doracle-h2.skip=false */
     @Parameter(property = "oracle-h2.skip", defaultValue = "false")
     private boolean skip;
@@ -110,6 +122,14 @@ public class ReplicateSchemasMojo extends AbstractMojo {
                 DataReplicator dataReplicator = new DataReplicator();
                 dataReplicator.copyData(oracleConn, h2Conn, metadataList);
                 getLog().info("Data copy completed.");
+            }
+
+            if (runFlyway) {
+                getLog().info("Running Flyway migrations to populate base data...");
+                List<String> locations = (flywayLocations != null && !flywayLocations.isEmpty())
+                        ? flywayLocations
+                        : Arrays.asList("classpath:db/migration");
+                FlywayRunner.run(h2JdbcUrl, h2User, h2Password, locations, flywayBaselineOnMigrate, getLog());
             }
 
             getLog().info("Replication finished. H2 is available at: " + h2JdbcUrl);
