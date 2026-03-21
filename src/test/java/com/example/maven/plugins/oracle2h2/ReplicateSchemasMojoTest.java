@@ -21,7 +21,7 @@ public class ReplicateSchemasMojoTest {
     @Before
     public void setUp() throws Exception {
         mojo = new ReplicateSchemasMojo();
-        set(mojo, "oracleJdbcUrl", "jdbc:oracle:thin:@//localhost:1521/dummy");
+        set(mojo, "oracleJdbcUrl", "jdbc:oracle:thin:@//localhost:1521/dummyschema");
         set(mojo, "oracleUser", "u");
         set(mojo, "oraclePassword", "p");
         set(mojo, "schemas", "SCOTT");
